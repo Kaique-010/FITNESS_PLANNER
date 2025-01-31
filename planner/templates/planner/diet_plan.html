@@ -1,0 +1,23 @@
+<!-- planner/templates/planner/diet_plan.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano de Dieta</title>
+</head>
+
+<body>
+    <h1>Plano de Dieta para {{ user.name }}</h1>
+    <p><strong>Idade:</strong> {{ user.age }} anos</p>
+    <p><strong>Peso:</strong> {{ user.weight }} kg</p>
+    <p><strong>Altura:</strong> {{ user.height }} cm</p>
+    <p><strong>Restrições Alimentares:</strong> {{ user.dietary_restrictions }}</p>
+    <p><strong>Metas:</strong> {{ user.goals }}</p>
+    <h2>Plano de Dieta:</h2>
+    <pre>{{ diet_plan.plan }}</pre>
+    <a href="{% url 'workout-plan-detail' user.id %}">Ver Plano de Treino</a>
+</body>
+
+</html>
