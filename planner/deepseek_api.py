@@ -4,6 +4,8 @@ from django.conf import settings
 class DeepSeekAPI:
     def __init__(self):
         self.api_key = settings.DEEPSEEK_API_KEY
+        if not self.api_key:
+            raise ValueError("DEEPSEEK_API_KEY não foi configurada corretamente!")
 
     def generate_workout_plan(self, prompt):
         # Exemplo de uso da chave da API

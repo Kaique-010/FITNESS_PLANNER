@@ -1,19 +1,26 @@
 import os
 from pathlib import Path
+from decouple import config 
+from dotenv import load_dotenv
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+load_dotenv()  # Carrega variáveis do .env
+
+DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')
+
+# Diretório base do projeto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# fitness_planner/settings.py
-from decouple import config
-
+# Carregar a chave da API do .env
 DEEPSEEK_API_KEY = config('DEEPSEEK_API_KEY', default='')
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-54oloj*ogn%o^48c5mem@#0-@becnk8kb%fi3_cabti(6!u%-h'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Exibir no terminal para depuração (remova em produção)
+print(f"Chave DeepSeek API: {DEEPSEEK_API_KEY}")
+
+# Chave secreta do Django (deveria estar no .env também)
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-54oloj*ogn%o^48c5mem@#0-@becnk8kb%fi3_cabti(6!u%-h')
+
+# Modo Debug (pegando do .env para melhor controle)
+DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS = ['*']
 

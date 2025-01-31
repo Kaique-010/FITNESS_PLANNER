@@ -18,12 +18,15 @@ class InputFormView(TemplateView):
 class GeneratePlanView(View):
     """Processa o formulário e gera os planos de dieta e treino."""
     def post(self, request):
+        print("🔹 Requisição recebida na GeneratePlanView")
         form = UserProfileForm(request.POST)
         if form.is_valid():
-            # Salva os dados do usuário no banco de dados
-            user = form.save()
+            print("✅ Formulário válido!")
+            user = form.save(commit=False)  # Salvar sem confirmar para inspecionar
+            user.save()
+            print(f"🆕 Usuário salvo: {user.name}")
 
-            # Formata o prompt com os dados do usuário
+            model_name = request.POST.get('model', 'gemini-1.5-flash')  # Correção do request.data
             prompt = (
                 f"Crie um plano personalizado para {user.name}, {user.age} anos, "
                 f"pesando {user.weight} kg e com {user.height} cm de altura. "
@@ -33,19 +36,31 @@ class GeneratePlanView(View):
                 f"Por favor, forneça um plano de treino e uma dieta semanal detalhados."
             )
 
-            # Gera os planos usando a API do DeepSeek
+            # Verifica se a API está configurada corretamente
             deepseek_api = DeepSeekAPI()
-            workout_plan = deepseek_api.generate_workout_plan(prompt)
-            diet_plan = deepseek_api.generate_diet_plan(prompt)
+            print(f"🔑 Usando chave da API: {deepseek_api.api_key}")
+            if not deepseek_api.api_key:
+                return render(request, 'planner/input_form.html', {'form': form, 'error': 'Erro: Chave da API não configurada.'})
 
-            # Salva os planos gerados no banco de dados
-            WorkoutPlan.objects.create(user=user, plan=workout_plan)
-            DietPlan.objects.create(user=user, plan=diet_plan)
+            # Gera os planos usando a API do DeepSeek
+            try:
+                workout_plan = deepseek_api.generate_workout_plan(prompt)
+                diet_plan = deepseek_api.generate_diet_plan(prompt)
+                print("✅ Planos gerados com sucesso!")
 
-            # Redireciona para a página de resultados
-            return redirect('workout-plan-detail', user_id=user.id)
-        
-        # Se o formulário não for válido, renderiza o formulário novamente com erros
+                # Salva os planos no banco de dados
+                WorkoutPlan.objects.create(user=user, plan=workout_plan)
+                DietPlan.objects.create(user=user, plan=diet_plan)
+                
+                print(f"💾 Planos salvos para {user.name}")
+
+                # Redireciona para a página de resultados
+                return redirect('workout-plan-detail', user_id=user.id)
+            except Exception as e:
+                print(f"❌ Erro ao gerar plano: {e}")
+                return render(request, 'planner/input_form.html', {'form': form, 'error': f'Erro ao gerar plano: {str(e)}'})
+
+        print("❌ Formulário inválido!")
         return render(request, 'planner/input_form.html', {'form': form})
 
 class WorkoutPlanDetailView(DetailView):
