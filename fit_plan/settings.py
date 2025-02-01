@@ -1,26 +1,24 @@
 import os
 from pathlib import Path
-from decouple import config 
 from dotenv import load_dotenv
+import google.generativeai as genai 
 
-load_dotenv()  # Carrega variáveis do .env
-
-DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY', '')
+load_dotenv()  # Carrega as variáveis do .env
 
 # Diretório base do projeto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Carregar a chave da API do .env
-DEEPSEEK_API_KEY = config('DEEPSEEK_API_KEY', default='')
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 # Exibir no terminal para depuração (remova em produção)
-print(f"Chave DeepSeek API: {DEEPSEEK_API_KEY}")
+print(f"Chave  API: {GOOGLE_API_KEY}")
 
 # Chave secreta do Django (deveria estar no .env também)
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-54oloj*ogn%o^48c5mem@#0-@becnk8kb%fi3_cabti(6!u%-h')
+SECRET_KEY = os.getenv('SECRET_KEY')
+print(SECRET_KEY)
 
 # Modo Debug (pegando do .env para melhor controle)
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
 
@@ -55,7 +53,7 @@ ROOT_URLCONF = 'fit_plan.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': [BASE_DIR / "templates"], 'DIRS': ['templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
