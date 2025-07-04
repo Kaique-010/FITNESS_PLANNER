@@ -1,0 +1,12 @@
+body {
+  background-color: black;
+  color: bisque;
+}
+
+h2 {
+  margin-top: 5rem;
+}
+
+.container {
+  max-width: 800px;
+}

@@ -1,0 +1,122 @@
+body {
+  background-color: #000; /* Fundo preto */
+  color: #ebdddd; /* Texto branco para contraste */
+  font-family: 'Arial', sans-serif;
+  height: 100vh; /* Ocupa a altura total da tela */
+  display: flex;
+  justify-content: center; /* Centraliza horizontalmente */
+  align-items: center; /* Centraliza verticalmente */
+  margin: 0;
+}
+
+/* Container do formulário */
+.container {
+  background-color: #322d2d; /* Fundo mais claro */
+  padding: 30px; /* Menos padding para reduzir a altura */
+  border-radius: 20px;
+  box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.3); /* Sombra elegante */
+  width: 100%;
+  max-width: 325px; /* Largura fixa */
+  text-align: center; /* Centraliza o texto */
+  height: auto; /* Altura ajustável */
+}
+
+/* Estiliza os campos do formulário */
+input,
+textarea,
+select {
+  width: 100%;
+  padding: 6px 10px; /* Menor padding para campos menores */
+  margin: 6px 0; /* Menor espaço entre os campos */
+  border: 1px solid #444;
+  border-radius: 8px;
+  background-color: #222;
+  color: #fff;
+  font-size: 12px; /* Menor tamanho de fonte */
+  transition: background-color 0.3s ease;
+  height: 32px; /* Menor altura para campos */
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  background-color: #555; /* Foco mais visível */
+  border-color: #007bff; /* Cor da borda em foco */
+  outline: none;
+}
+
+/* Estiliza os rótulos */
+label {
+  font-size: 12px; /* Menor tamanho para rótulos */
+  font-weight: bold;
+  display: block;
+  margin-bottom: 4px; /* Menor espaço entre o rótulo e o campo */
+  color: #ddd;
+  text-align: center;
+}
+
+button {
+  background-color: #ff5722;
+  color: white;
+  padding: 8px;
+  border: none;
+  border-radius: 15px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  margin-top: 12px;
+  height: 40px;
+}
+
+button:hover {
+  background-color: #e64a19;
+}
+
+/* Melhorando o layout do formulário */
+.form-group {
+  margin-bottom: 6px; /* Reduzindo ainda mais o espaço entre os campos */
+  color: #ddd;
+}
+
+/* Ajustando os campos de entrada */
+.form-control {
+  background-color: #6d6c6c; /* Cor de fundo ajustada */
+  color: #fff; /* Texto branco */
+  border: 1px solid #444;
+  border-radius: 8px;
+  padding: 6px 10px; /* Menor padding para reduzir altura */
+  font-size: 12px; /* Tamanho de fonte reduzido */
+  height: 32px; /* Reduzindo altura dos inputs */
+}
+
+/* Ajustando as áreas de texto */
+textarea.form-control {
+  height: 60px; /* Reduzindo a altura das textareas */
+  resize: none; /* Impede redimensionamento manual */
+}
+
+/* Corrigindo erro de classe inválida */
+.form-input-text-area {
+  color: aliceblue;
+}
+
+::placeholder {
+  color: rgba(108, 0, 0, 0.7); /* Altera a cor do placeholder */
+  font-size: 12px; /* Reduz o tamanho da fonte */
+  font-style: italic; /* Deixa o texto em itálico */
+}
+/* Ajuste para telas pequenas */
+@media (max-width: 768px) {
+  .form-group {
+    width: 100%;
+  }
+}
+
+h1 {
+  font-size: 18px; /* Título menor */
+  color: #fff;
+  margin-bottom: 12px; /* Menor espaço abaixo do título */
+}
+
+

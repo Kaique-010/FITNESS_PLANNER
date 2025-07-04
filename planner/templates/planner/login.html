@@ -1,0 +1,22 @@
+{% extends "planner/base.html" %}
+{% block content %}
+<div class="container mt-5" style="max-width: 400px;">
+    <h2 class="text-center mb-4"><i class="bi bi-person-circle"></i> Entrar</h2>
+    <form method="post" novalidate class="needs-validation" autocomplete="username">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="form-group mb-3">
+            <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <div class="invalid-feedback d-block">{{ field.errors|striptags }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-box-arrow-in-right"></i> Entrar</button>
+    </form>
+    <div class="mt-3 text-center">
+        <a href="{% url 'register' %}">Não tem conta? <strong>Cadastre-se</strong></a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fitness Planner</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" />
+  <style>
+    body.bg-dark,
+    .bg-dark {
+      background-color: #181a1b !important;
+      color: #f8f9fa !important;
+    }
+
+    .card.bg-dark,
+    .modal-content.bg-dark {
+      background-color: #23272b !important;
+      color: #f8f9fa !important;
+    }
+
+    .navbar-dark .navbar-nav .nav-link,
+    .bg-dark .nav-link,
+    .bg-dark .navbar-brand {
+      color: #f8f9fa !important;
+    }
+
+    .nav-pills .nav-link {
+      color: white;
+      font-size: 1.2rem;
+      font-weight: bold;
+      transition: background 0.3s;
+      background-color: cadetblue;
+    }
+
+    .nav-pills .nav-link.nav-link.active {
+      background-color: rgb(32, 255, 181);
+    }
+
+    .nav-pills .nav-link.active,
+    .nav-pills .nav-link:hover {
+      background: #f1d1a2;
+      color: coral;
+    }
+
+    .container {
+      max-width: 900px;
+      margin-top: 20px;
+    }
+
+    .bi-house-door {
+      color: rgb(235, 207, 149);
+    }
+
+    .bi-bicycle {
+      color: forestgreen;
+    }
+
+    .bi-heart-pulse {
+      color: deeppink;
+    }
+
+    h3 {
+      text-align: center;
+      margin-top: 10%;
+      font-style: oblique;
+      font-family: "Times New Roman", Times, serif;
+      font-weight: bolder;
+      font-size: medium;
+    }
+
+    .theme-toggle {
+      cursor: pointer;
+      font-size: 1.5rem;
+      margin-left: 1rem;
+      transition: color 0.2s;
+    }
+
+    .theme-toggle:hover {
+      color: #ffc107;
+    }
+  </style>
+</head>
+
+<body id="main-body">
+  <div class="container">
+    <ul class="nav nav-pills nav-fill bg-dark p-2 rounded-3">
+      <li class="nav-item">
+        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">
+          Home <i class="bi bi-house-door"></i>
+        </a>
+      </li>
+      {% if request.user.is_authenticated and user %}
+      <li class="nav-item">
+        <a class="nav-link {% if request.path == '/workout-plan/'|add:user.id %}active{% endif %}"
+          href="{% url 'workout-plan-detail' user_id=user.id %}">
+          Treinos <i class="bi bi-bicycle"></i>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if request.path == '/diet-plan/'|add:user.id %}active{% endif %}"
+          href="{% url 'diet-plan-detail' user_id=user.id %}">
+          Dietas <i class="bi bi-heart-pulse"></i>
+        </a>
+      </li>
+      {% endif %}
+      {% if request.user.is_authenticated %}
+      <li class="nav-item">
+        <a class="nav-link {% if request.path == '/meu-treino/' %}active{% endif %}" href="{% url 'my-workout' %}">
+          Meu Treino <i class="bi bi-calendar-check"></i>
+        </a>
+      </li>
+      {% endif %}
+      {% if request.user.is_authenticated %}
+      <li class="nav-item ms-auto">
+        <span class="nav-link disabled">Olá, {{ request.user.username }}</span>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'logout' %}">Sair</a>
+      </li>
+      {% else %}
+      <li class="nav-item ms-auto">
+        <a class="nav-link" href="{% url 'login' %}">Entrar</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="{% url 'register' %}">Cadastrar</a>
+      </li>
+      {% endif %}
+      <li class="nav-item">
+        <span id="theme-toggle" class="theme-toggle" title="Alternar tema"><i class="bi bi-moon-stars-fill"></i></span>
+      </li>
+    </ul>
+    <h3><i class="bi bi-heart-pulse fs-1"></i> FIT PLAN</h3>
+  </div>
+
+  <div class="container mt-4 mb-5">{% block content %} {% endblock %}</div>
+  <script>
+    // Função para alternar tema
+    function setTheme(theme) {
+      const body = document.getElementById('main-body');
+      if (theme === 'dark') {
+        body.classList.add('bg-dark', 'text-light');
+        document.querySelectorAll('.card').forEach(c => c.classList.add('bg-dark', 'text-light'));
+        document.querySelectorAll('.modal-content').forEach(c => c.classList.add('bg-dark', 'text-light'));
+        document.getElementById('theme-toggle').innerHTML = '<i class="bi bi-brightness-high-fill"></i>';
+      } else {
+        body.classList.remove('bg-dark', 'text-light');
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('bg-dark', 'text-light'));
+        document.querySelectorAll('.modal-content').forEach(c => c.classList.remove('bg-dark', 'text-light'));
+        document.getElementById('theme-toggle').innerHTML = '<i class="bi bi-moon-stars-fill"></i>';
+      }
+      localStorage.setItem('theme', theme);
+    }
+    // Detecta preferência salva ou do sistema
+    function getPreferredTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved) return saved;
+      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+      setTheme(getPreferredTheme());
+      document.getElementById('theme-toggle').onclick = function () {
+        const current = getPreferredTheme();
+        setTheme(current === 'dark' ? 'light' : 'dark');
+      };
+    });
+  </script>
+</body>
+
+</html>
