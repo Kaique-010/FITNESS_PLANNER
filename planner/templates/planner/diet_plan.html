@@ -2,35 +2,63 @@
 {% extends "planner/base.html" %} {%load static%} {%block content%}
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
-    />
 
-    <link rel="stylesheet" href="{% static 'planner/dstyles.css' %}" />
-    <title>Plano de Dieta</title>
-  </head>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" />
 
-  <body>
-    <div class="container mt-lg-5">
-      <h1>Plano de Dieta para: {{ user.name }}</h1>
-      <p><strong>Idade:</strong> {{ user.age }} anos</p>
-      <p><strong>Peso:</strong> {{ user.weight }} kg</p>
-      <p><strong>Altura:</strong> {{ user.height }} cm</p>
-      <p>
-        <strong>Restrições Alimentares:</strong> {{ user.dietary_restrictions }}
-      </p>
-      <p><strong>Metas:</strong> {{ user.goals }}</p>
-      <h2>Plano de Dieta:</h2>
-      <pre>{{ diet_plan.plan }}</pre>
+  <link rel="stylesheet" href="{% static 'planner/dstyles.css' %}" />
+  <title>Plano de Dieta</title>
+</head>
+
+<body>
+  <div class="container mt-lg-5">
+    <h1>Plano de Dieta para: {{ user.name }}</h1>
+    <p><strong>Idade:</strong> {{ user.age }} anos</p>
+    <p><strong>Peso:</strong> {{ user.weight }} kg</p>
+    <p><strong>Altura:</strong> {{ user.height }} cm</p>
+    <p><strong>Restrições Alimentares:</strong> {{ user.dietary_restrictions }}</p>
+    <p><strong>Metas:</strong> {{ user.goals }}</p>
+    <h2>Plano de Dieta:</h2>
+    {% if plan_error %}
+    <div class="alert alert-danger">{{ plan_error }}</div>
+    {% elif plan_data and plan_data.dias %}
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+      {% for dia in plan_data.dias %}
+      <div class="col">
+        <div class="card h-100 shadow-sm">
+          <div class="card-header bg-success text-white">
+            <strong><i class="bi bi-calendar-event"></i> {{ dia.dia }}</strong>
+          </div>
+          <div class="card-body">
+            {% if not dia.refeicoes %}
+            <div class="alert alert-info text-center mb-0">Sem refeições cadastradas.</div>
+            {% else %}
+            <ul class="list-group list-group-flush">
+              {% for ref in dia.refeicoes %}
+              <li class="list-group-item">
+                <span class="fw-bold"><i class="bi bi-egg-fried"></i> {{ ref.nome }}</span>
+                <ul class="mb-0 ms-3">
+                  {% for item in ref.itens %}
+                  <li>{{ item }}</li>
+                  {% endfor %}
+                </ul>
+              </li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
     </div>
-  </body>
+    {% else %}
+    <div class="alert alert-warning">Plano de dieta não encontrado ou mal formatado.</div>
+    {% endif %}
+  </div>
+</body>
+
 </html>
 {% endblock%}

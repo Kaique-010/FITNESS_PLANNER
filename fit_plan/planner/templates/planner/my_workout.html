@@ -1,0 +1,64 @@
+{% extends "planner/base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Meu Treino</h2>
+    {% if plan %}
+    <div class="mb-3 text-end">
+        <a href="{% url 'input-form' %}" class="btn btn-outline-primary">
+            <i class="bi bi-plus-circle"></i> Gerar novo plano
+        </a>
+    </div>
+    {% endif %}
+    {% if not plan %}
+    <div class="alert alert-info">Você ainda não possui um plano de treino gerado.</div>
+    {% else %}
+    {% for day in days_data %}
+    <div class="card mb-3">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <strong>{{ day.day.day_of_week }}</strong>
+            <span class="badge bg-light text-dark ms-2">
+                {{ day.done }}/{{ day.total }} feitos
+            </span>
+        </div>
+        <ul class="list-group list-group-flush">
+            {% for ex in day.exercises %}
+            <li class="list-group-item d-flex align-items-center justify-content-between">
+                <label class="form-check-label d-flex align-items-center" for="ex-{{ ex.obj.id }}">
+                    <input type="checkbox" class="form-check-input me-2 toggle-progress" id="ex-{{ ex.obj.id }}"
+                        data-exid="{{ ex.obj.id }}" {% if ex.done %}checked{% endif %} aria-label="Marcar como feito">
+                    <span {% if ex.done %}style="text-decoration: line-through; color: #28a745;" {% endif %}>{{
+                        ex.obj.name }}</span>
+                </label>
+                <span class="bi" role="img" aria-label="{{ ex.done|yesno:'Feito,Pendente' }}" style="font-size:1.2rem;">
+                    {% if ex.done %}<i class="bi bi-check-circle-fill text-success"></i>{% else %}<i
+                        class="bi bi-circle"></i>{% endif %}
+                </span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endfor %}
+    {% endif %}
+</div>
+<script>
+    document.querySelectorAll('.toggle-progress').forEach(cb => {
+        cb.addEventListener('change', function () {
+            const exid = this.getAttribute('data-exid');
+            fetch('{% url "toggle-exercise-progress" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'exercise_id=' + exid
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    }
+                });
+        });
+    });
+</script>
+{% endblock %}

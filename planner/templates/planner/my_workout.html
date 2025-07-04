@@ -1,0 +1,143 @@
+{% extends "planner/base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Meu Treino</h2>
+
+    {% if not plan %}
+    <div class="alert alert-info">Você ainda não possui um plano de treino gerado.</div>
+
+    {% elif days|length == 0 %}
+    <div class="alert alert-warning">Seu plano não possui dias ou exercícios cadastrados. Gere um novo plano ou contate
+        o suporte.</div>
+
+    {% else %}
+    <div class="mb-3 text-center">
+        <a href="{% url 'input-form' %}" class="btn btn-outline-primary">
+            <i class="bi bi-plus-circle"></i> Gerar novo plano
+        </a>
+    </div>
+
+    <div class="row mb-4 justify-content-center">
+        <div class="col-12">
+            <div class="d-flex flex-wrap gap-2 justify-content-center">
+                {% for day in days %}
+                <a href="{% url 'dia-treino' day.id %}"
+                    class="btn btn-outline-secondary {% if selected_day and selected_day.id == day.id %}active fw-bold border-primary{% endif %}">
+                    {{ day.day_of_week }}
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% if selected_day %}
+    <div class="card mb-5 mx-auto shadow" style="max-width: 600px;">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <strong>{{ selected_day.day_of_week }}</strong>
+            <span id="progresso-badge" class="badge bg-light text-dark ms-2">
+                {{ done }}/{{ total }} feitos
+            </span>
+        </div>
+        <ul class="list-group list-group-flush mb-3">
+            {% for ex in exercises %}
+            <li class="list-group-item d-flex align-items-center justify-content-between">
+                <div class="d-flex flex-column flex-md-row align-items-md-center w-100">
+                    <label class="form-check-label d-flex align-items-center flex-grow-1" for="ex-{{ ex.obj.id }}">
+                        {% if ex.obj.name|lower != "descanso" %}
+                        <input type="checkbox" class="form-check-input me-2 toggle-progress" id="ex-{{ ex.obj.id }}"
+                            data-exid="{{ ex.obj.id }}" {% if ex.done %}checked{% endif %}>
+                        {% endif %}
+                        <span class="exercise-label" {% if ex.done and ex.obj.name|lower != "descanso" %}
+                        style="text-decoration: line-through; color: #28a745;" {% endif %}>
+                            {{ ex.obj.name }}
+                        </span>
+                        {% if ex.obj.name|lower != "descanso" %}
+                        <a href="https://www.youtube.com/results?search_query=exercicio+{{ ex.obj.name|urlencode }}"
+                            target="_blank" class="ms-2 text-danger" title="Ver exemplo no YouTube">
+                            <i class="bi bi-youtube"></i>
+                        </a>
+                        {% endif %}
+                    </label>
+                    <span class="ms-3 small text-muted">
+                        {% if ex.obj.series %}
+                        <span class="me-2"><i class="bi bi-list-ol"></i> {{ ex.obj.series }} séries</span>
+                        {% endif %}
+                        {% if ex.obj.repeticoes %}
+                        <span class="me-2"><i class="bi bi-arrow-repeat"></i> {{ ex.obj.repeticoes }} reps</span>
+                        {% endif %}
+                        {% if ex.obj.descanso %}
+                        <span><i class="bi bi-alarm"></i> {{ ex.obj.descanso }}s</span>
+                        {% endif %}
+                    </span>
+                </div>
+                {% if ex.obj.name|lower != "descanso" %}
+                <i class="bi {% if ex.done %}bi-check-circle-fill text-success{% else %}bi-circle{% endif %}" role="img"
+                    aria-label="{{ ex.done|yesno:'Feito,Pendente' }}" style="font-size:1.2rem;"></i>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+        {% if all_done %}
+        <div class="card-footer text-center">
+            <button id="reset-day-btn" class="btn btn-success"><i class="bi bi-trophy"></i> Treino do dia
+                concluído!</button>
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="alert alert-info text-center mt-5">Selecione um dia para ver os exercícios.</div>
+    {% endif %}
+    {% endif %}
+</div>
+
+<script>
+    document.querySelectorAll('.toggle-progress').forEach(cb => {
+        cb.addEventListener('change', function () {
+            const exid = this.dataset.exid;
+            const span = this.closest('label').querySelector('.exercise-label');
+            const icon = this.closest('li').querySelector('.bi');
+
+            fetch('{% url "toggle-exercise-progress" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'exercise_id=' + exid
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        if (this.checked) {
+                            span.style.textDecoration = 'line-through';
+                            span.style.color = '#28a745';
+                            if (icon) icon.className = 'bi bi-check-circle-fill text-success';
+                        } else {
+                            span.style.textDecoration = '';
+                            span.style.color = '';
+                            if (icon) icon.className = 'bi bi-circle';
+                        }
+
+                        const badge = document.getElementById('progresso-badge');
+                        if (badge && data.done !== undefined && data.total !== undefined) {
+                            badge.textContent = `${data.done}/${data.total} feitos`;
+                        }
+                    }
+                });
+        });
+    });
+
+    // Limpar seleções ao encerrar treino
+    document.addEventListener('DOMContentLoaded', function () {
+        const resetBtn = document.getElementById('reset-day-btn');
+        if (resetBtn) {
+            resetBtn.onclick = function () {
+                document.querySelectorAll('.toggle-progress:checked').forEach(cb => {
+                    cb.checked = false;
+                    cb.dispatchEvent(new Event('change'));
+                });
+            };
+        }
+    });
+</script>
+{% endblock %}

@@ -3,21 +3,15 @@ from pathlib import Path
 from dotenv import load_dotenv
 import google.generativeai as genai 
 
-load_dotenv()  # Carrega as variáveis do .env
-
-# Diretório base do projeto
+load_dotenv()
+    
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-# Exibir no terminal para depuração (remova em produção)
-print(f"Chave  API: {GOOGLE_API_KEY}")
 
-# Chave secreta do Django (deveria estar no .env também)
 SECRET_KEY = os.getenv('SECRET_KEY')
-print(SECRET_KEY)
 
-# Modo Debug (pegando do .env para melhor controle)
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['*']
@@ -53,7 +47,7 @@ ROOT_URLCONF = 'fit_plan.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"], 'DIRS': ['templates'],
+        'DIRS': [BASE_DIR / "templates"],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -75,7 +69,7 @@ WSGI_APPLICATION = 'fit_plan.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': str(BASE_DIR / 'db.sqlite3'),
     }
 }
 
@@ -118,3 +112,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/meu-treino/'
