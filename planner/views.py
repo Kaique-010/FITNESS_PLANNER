@@ -71,10 +71,18 @@ def parse_and_create_days_exercises_json(plan_obj):
 @method_decorator(login_required, name='dispatch')
 class GeneratePlanView(View):
     def post(self, request):
-        profile = UserProfile.objects.get(user=request.user)
-        form = UserProfileForm(request.POST, instance=profile)
-        if form.is_valid():
+        print("🚀 Requisição recebida para geração de plano.")
+        try:
+            profile = UserProfile.objects.get(user=request.user)
+            form = UserProfileForm(request.POST, instance=profile)
+
+            if not form.is_valid():
+                print("❌ Formulário inválido.")
+                return render(request, 'planner/input_form.html', {'form': form})
+
             form.save()
+            print("✅ Perfil atualizado com sucesso.")
+
             user = profile
             prompt = (
                 f"Crie um plano de treino SEMANAL personalizado para {user.name}, {user.age} anos, "
@@ -87,35 +95,51 @@ class GeneratePlanView(View):
                 f"DIETA:\n{{'dias': [{{'dia': 'Segunda', 'refeicoes': [{{'nome': 'Café da manhã', 'itens': ['Ovos', 'Aveia']}}, ...]}}, ...]}}\n"
                 f"Sem explicações, sem comentários, apenas os dois JSONs puros, começando cada um na linha seguinte ao título."
             )
-            try:
-                model = genai.GenerativeModel("gemini-1.5-flash")
-                response = model.generate_content(prompt)
-                resposta = response.text.strip()
-                print("RESPOSTA DO MODELO:", resposta)
-                # Extrai os dois JSONs do texto
-                treino_json = ''
-                dieta_json = ''
-                for bloco in resposta.split('DIETA:'):
-                    if 'TREINO:' in bloco:
-                        treino_json = bloco.split('TREINO:')[1].strip()
-                    else:
-                        dieta_json = bloco.strip()
-                # Apaga planos antigos do usuário
-                WorkoutPlan.objects.filter(user=request.user).delete()
-                DietPlan.objects.filter(user=request.user).delete()
-                # Cria novo plano de treino
-                workout_plan = WorkoutPlan.objects.create(user=request.user, plan=treino_json)
-                # Cria novo plano de dieta
-                diet_plan = DietPlan.objects.create(user=request.user, plan=dieta_json)
-                # Só parseia se treino_json não estiver vazio
-                if not treino_json:
-                    print("ERRO: treino_json vazio! Não foi possível criar os dias/exercícios.")
-                    return render(request, 'planner/input_form.html', {'form': form, 'error': 'O modelo de IA não retornou o plano de treino corretamente. Tente novamente ou ajuste o prompt.'})
-                parse_and_create_days_exercises_json(workout_plan)
-                return redirect('workout-plan-detail', user_id=profile.id)
-            except Exception as e:
-                return render(request, 'planner/input_form.html', {'form': form, 'error': f'Erro ao gerar plano: {str(e)}'})
-        return render(request, 'planner/input_form.html', {'form': form})
+
+            print("🧠 Prompt preparado, chamando modelo...")
+            model = genai.GenerativeModel("gemini-1.5-flash")
+            response = model.generate_content(prompt)
+            print("📥 Resposta recebida do modelo.")
+            resposta = response.text.strip()
+            print("📦 Resposta completa:", resposta[:500])  # limita a 500 chars pra não floodar
+
+            treino_json = ''
+            dieta_json = ''
+            for bloco in resposta.split('DIETA:'):
+                if 'TREINO:' in bloco:
+                    treino_json = bloco.split('TREINO:')[1].strip()
+                else:
+                    dieta_json = bloco.strip()
+
+            if not treino_json:
+                print("❌ ERRO: treino_json veio vazio.")
+                return render(request, 'planner/input_form.html', {
+                    'form': form,
+                    'error': 'O modelo de IA não retornou o plano de treino corretamente. Tente novamente ou ajuste o prompt.'
+                })
+
+            print("🧹 Limpando planos anteriores...")
+            WorkoutPlan.objects.filter(user=request.user).delete()
+            DietPlan.objects.filter(user=request.user).delete()
+
+            print("💾 Salvando novos planos...")
+            workout_plan = WorkoutPlan.objects.create(user=request.user, plan=treino_json)
+            diet_plan = DietPlan.objects.create(user=request.user, plan=dieta_json)
+
+            print("🛠️ Parseando exercícios...")
+            parse_and_create_days_exercises_json(workout_plan)
+
+            print("✅ Plano gerado com sucesso! Redirecionando para detalhe.")
+            return redirect('workout-plan-detail', user_id=profile.id)
+
+        except Exception as e:
+            import traceback
+            print("❌ EXCEÇÃO AO GERAR PLANO:")
+            traceback.print_exc()
+            return render(request, 'planner/input_form.html', {
+                'form': form if 'form' in locals() else UserProfileForm(),
+                'error': f'Erro ao gerar plano: {str(e)}'
+            })
 
 
 @method_decorator(login_required, name='dispatch')
