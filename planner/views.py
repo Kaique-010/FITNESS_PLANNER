@@ -10,6 +10,7 @@ from .forms import UserProfileForm, CustomUserCreationForm, CustomAuthentication
 from .deepseek_api import DeepSeekAPI
 import google.generativeai as genai
 import os
+import traceback
 from django.http import JsonResponse
 from .models import WorkoutDay, Exercise, WorkoutProgress
 from django.views.decorators.csrf import csrf_exempt
@@ -133,11 +134,10 @@ class GeneratePlanView(View):
             return redirect('workout-plan-detail', user_id=profile.id)
 
         except Exception as e:
-            import traceback
-            print("❌ EXCEÇÃO AO GERAR PLANO:")
+            print("❌ EXCEÇÃO AO GERAR PLANO:", e)
             traceback.print_exc()
             return render(request, 'planner/input_form.html', {
-                'form': form if 'form' in locals() else UserProfileForm(),
+                'form': form,
                 'error': f'Erro ao gerar plano: {str(e)}'
             })
 
