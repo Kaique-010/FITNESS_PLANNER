@@ -7,12 +7,10 @@ load_dotenv()
     
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GOOGLE_API_KEY = "AIzaSyACqqRH5Qn3eOaOJQAs3dsgieDZqEsBmE4"
+SECRET_KEY = "django-insecure-4!@#a$%b^&*c(1234567890)zxcvbnmasdfghjkl"
 
-
-SECRET_KEY = os.getenv('SECRET_KEY')
-
-DEBUG = os.getenv('DEBUG', 'True') == 'True'
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
